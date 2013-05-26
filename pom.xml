@@ -13,6 +13,7 @@
 
         <groovy.version>2.1.1</groovy.version>
 		<groovy.eclipse.version>2.1.1-01</groovy.eclipse.version>
+        <groovy.eclipse.compiler.version>2.7.0-01</groovy.eclipse.compiler.version>
 		<scala.version>2.10.1</scala.version>
 
 		<groovy.stubs.output.directory>${project.build.directory}/generated-sources/groovy-stubs/main</groovy.stubs.output.directory>
@@ -107,10 +108,16 @@
                 </executions>
             </plugin>
 
-            <!-- 3) Disable standard compiler -->
+            <!-- 3) Could not use groovy-eclipse-compiler as it tries to compile the stubs generated in step 1.
+                If you can find a way to remove the sourceRoot added by gmaven-plugin, or make it not add it,
+                or make the compiler to ignore the stubs and compile only from src/main/java, this should work.
+                Util than, I use maven-antrun-plugin instead. -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <compilerId>groovy-eclipse-compiler</compilerId>
+                </configuration>
                 <executions>
                     <execution>
                         <id>default-compile</id>
@@ -121,9 +128,21 @@
                         <phase>none</phase>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>groovy-eclipse-compiler</artifactId>
+                        <version>${groovy.eclipse.compiler.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>groovy-eclipse-batch</artifactId>
+                        <version>${groovy.eclipse.version}</version>
+                    </dependency>
+                </dependencies>
 			</plugin>
 
-            <!-- 4) Compile Groovy & Java code with already compiled Scala classes -->
+             <!-- 4) Compile Groovy & Java code with already compiled Scala classes -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
